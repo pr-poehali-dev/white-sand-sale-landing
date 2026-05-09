@@ -1,473 +1,668 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-const IMG_SAND = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/847d21e0-b9c9-4d6a-96c1-805cfe0175fd.jpg";
-const IMG_WOOD = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/90f70542-ba58-49dc-8a60-d3799bd7e816.jpg";
-const IMG_TREE = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/ca227e70-9d47-424a-b9b9-31e974ba6812.jpg";
+const IMG_SAND = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/a3e1989c-ad69-48cb-8a90-4738197e15d3.jpg";
+const IMG_WOOD = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/be4b05c5-02be-41ab-b528-ecf933e1db63.jpg";
+const IMG_TRUCK = "https://cdn.poehali.dev/projects/b45ef94b-f17a-4771-a9f6-b1fbbe569b1d/files/6b1c0c5b-ba18-44a5-a9d2-b6b54980be2a.jpg";
 
-type IconName =
-  | "Phone" | "Mail" | "MapPin" | "Menu" | "X" | "Truck" | "Package"
-  | "TreePine" | "Shovel" | "Home" | "ChevronDown" | "CheckCircle"
-  | "Star" | "Clock" | "Shield" | "Warehouse" | "Hammer" | "Leaf";
+/* ─── palette shortcuts ─── */
+const BLUE = "hsl(210 80% 38%)";
+const AMBER = "hsl(38 85% 52%)";
+const DARK = "hsl(220 25% 12%)";
 
-const NAV_LINKS = [
-  { href: "services", label: "Услуги" },
-  { href: "catalog", label: "Продукция" },
-  { href: "calc", label: "Калькулятор" },
-  { href: "about", label: "О компании" },
-  { href: "contacts", label: "Контакты" },
+/* ─── nav ─── */
+const NAV = [
+  { id: "services", label: "Услуги" },
+  { id: "sand", label: "Песок" },
+  { id: "bulk", label: "Сыпучие" },
+  { id: "wood", label: "Деревянные изделия" },
+  { id: "trees", label: "Спил деревьев" },
+  { id: "contacts", label: "Контакты" },
 ];
 
-const SERVICES: { icon: IconName; title: string; desc: string; color: string }[] = [
+/* ─── services overview ─── */
+const SERVICES = [
   {
-    icon: "Package",
+    emoji: "🪣",
     title: "Белый песок в мешках",
-    desc: "Мешки по 50 кг. Речной белый песок высшего качества для детских песочниц, строительства и ландшафта.",
-    color: "hsl(43 90% 56%)",
+    sub: "50 кг / мешок",
+    desc: "Чистый речной белый песок для детских песочниц в садах, школах, дворах. Без примесей, сертифицирован.",
+    color: BLUE,
+    bg: "hsl(210 80% 38% / 0.08)",
+    id: "sand",
   },
   {
-    icon: "Truck",
+    emoji: "🚛",
     title: "Сыпучие грузы навалом",
-    desc: "Доставка песка, щебня, гравия, чернозёма по Челябинску и области. Самосвалы от 5 до 20 тонн.",
-    color: "hsl(28 85% 48%)",
+    sub: "Самосвалы от 5 до 20 т",
+    desc: "Доставка песка, щебня, гравия, ПГС, чернозёма по Челябинску и всей области. Быстро и в срок.",
+    color: AMBER,
+    bg: "hsl(38 85% 52% / 0.08)",
+    id: "bulk",
   },
   {
-    icon: "Hammer",
+    emoji: "🏡",
     title: "Деревянные изделия",
-    desc: "Производство детских песочниц, веранд и домиков из натуральной сосны. Под заказ и со склада.",
-    color: "hsl(25 45% 40%)",
+    sub: "Сосна, покраска, монтаж",
+    desc: "Производство детских песочниц, домиков и веранд из натуральной сосны. Под заказ и в наличии.",
+    color: "hsl(25 55% 38%)",
+    bg: "hsl(25 55% 38% / 0.08)",
+    id: "wood",
   },
   {
-    icon: "TreePine",
+    emoji: "🌳",
     title: "Спил аварийных деревьев",
-    desc: "Профессиональный спил и вывоз аварийных, сухих и опасных деревьев. Работаем по всему Челябинску.",
-    color: "hsl(140 40% 38%)",
+    sub: "С вывозом и уборкой",
+    desc: "Профессиональный спил и вывоз аварийных, сухостойных и опасных деревьев по Челябинску.",
+    color: "hsl(140 45% 33%)",
+    bg: "hsl(140 45% 33% / 0.08)",
+    id: "trees",
   },
 ];
 
-const PRODUCTS = [
-  { name: "Белый речной песок", unit: "мешок 50 кг", price: "от 350 ₽", emoji: "🪣", tag: "Хит продаж" },
-  { name: "Песок навалом", unit: "от 1 тонны", price: "от 800 ₽/т", emoji: "🚛", tag: null },
-  { name: "Щебень фракции 5–20", unit: "навалом / мешки", price: "от 1 200 ₽/т", emoji: "🪨", tag: null },
-  { name: "Чернозём", unit: "навалом", price: "от 900 ₽/т", emoji: "🌱", tag: "Популярно" },
-  { name: "Детская песочница", unit: "размер 1,5×1,5 м", price: "от 4 900 ₽", emoji: "🏗️", tag: "Под заказ" },
-  { name: "Детский домик", unit: "сосна, покраска", price: "от 24 000 ₽", emoji: "🏡", tag: "Под заказ" },
-  { name: "Веранда деревянная", unit: "проект индивидуально", price: "от 45 000 ₽", emoji: "🪵", tag: null },
-  { name: "Спил дерева", unit: "за единицу", price: "от 1 500 ₽", emoji: "🌳", tag: "Срочно" },
+/* ─── sand products ─── */
+const SAND_PRODUCTS = [
+  { name: "Белый речной песок", qty: "1 мешок × 50 кг", price: "350 ₽", note: "Для детских песочниц" },
+  { name: "Белый речной песок", qty: "10 мешков × 50 кг", price: "3 200 ₽", note: "Экономия 300 ₽" },
+  { name: "Белый речной песок", qty: "20 мешков × 50 кг", price: "6 000 ₽", note: "Для сада / школы" },
+  { name: "Белый речной песок", qty: "от 50 мешков", price: "Договорная", note: "Оптовые поставки" },
 ];
 
+/* ─── bulk products ─── */
+const BULK_PRODUCTS = [
+  { name: "Песок строительный", unit: "тонна", price: "от 800 ₽" },
+  { name: "Щебень фр. 5–20", unit: "тонна", price: "от 1 200 ₽" },
+  { name: "Щебень фр. 20–40", unit: "тонна", price: "от 1 100 ₽" },
+  { name: "ПГС (песчано-гравийная смесь)", unit: "тонна", price: "от 750 ₽" },
+  { name: "Чернозём", unit: "тонна", price: "от 900 ₽" },
+  { name: "Отсев", unit: "тонна", price: "от 650 ₽" },
+];
+
+/* ─── wooden products ─── */
+const WOOD_PRODUCTS = [
+  { emoji: "🏗️", name: "Детская песочница", size: "1,5 × 1,5 м", price: "от 4 900 ₽" },
+  { emoji: "🏗️", name: "Детская песочница с навесом", size: "1,5 × 1,5 м", price: "от 7 500 ₽" },
+  { emoji: "🏡", name: "Детский домик", size: "Стандарт", price: "от 24 000 ₽" },
+  { emoji: "🏡", name: "Детский домик с горкой", size: "Расширенный", price: "от 38 000 ₽" },
+  { emoji: "🪵", name: "Веранда деревянная", size: "Индивидуально", price: "от 45 000 ₽" },
+  { emoji: "🌿", name: "Беседка", size: "Индивидуально", price: "от 35 000 ₽" },
+];
+
+/* ─── reviews ─── */
 const REVIEWS = [
-  { name: "Максим Д.", stars: 5, text: "Заказывали 10 мешков белого песка для детской площадки. Привезли в тот же день, качество отличное — чистый, без мусора. Дети довольны!" },
-  { name: "Ирина К.", stars: 5, text: "Делали деревянную песочницу под заказ. Сделали быстро, покрасили, установили. Выглядит на 5+. Рекомендую всем с детьми!" },
-  { name: "Андрей Л.", stars: 5, text: "Вызывали на спил большого тополя. Приехали вовремя, спилили аккуратно, всё убрали. Цена адекватная. Буду обращаться ещё." },
-  { name: "Светлана Н.", stars: 4, text: "Привезли самосвал щебня. Выгрузили точно куда просила. Единственное — чуть дольше ждала чем ожидала, но результатом довольна." },
+  { name: "Елена В.", role: "Заведующая детским садом", text: "Заказываем белый песок для наших четырёх песочниц уже третий год. Привозят вовремя, качество всегда отличное — чистый, без мусора и камней. Дети счастливы!", stars: 5 },
+  { name: "Максим Д.", role: "Частный заказчик", text: "Привезли 15 кубов щебня и 10 кубов чернозёма. Самосвал приехал точно в указанное время, выгрузили аккуратно. Буду обращаться ещё.", stars: 5 },
+  { name: "Ирина С.", role: "Мама двоих детей", text: "Заказали деревянный домик с горкой и песочницу. Сделали за две недели, установили прямо во дворе. Качество дерева отличное, дети не вылезают!", stars: 5 },
+  { name: "Андрей Л.", role: "Председатель ТСЖ", text: "Вызывали на спил большого старого тополя. Приехали быстро, спилили аккуратно, весь мусор вывезли. Двор чистый. Рекомендую.", stars: 5 },
 ];
 
 const SAND_PRICE = 350;
 const BULK_PRICE = 800;
 
+type F = { name: string; phone: string; service: string; comment: string };
+
 export default function Index() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [bags, setBags] = useState(10);
-  const [bulk, setBulk] = useState(5);
-  const [form, setForm] = useState({ name: "", phone: "", service: "", comment: "" });
+  const [tons, setTons] = useState(5);
+  const [form, setForm] = useState<F>({ name: "", phone: "", service: "", comment: "" });
   const [sent, setSent] = useState(false);
 
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    setMenuOpen(false);
+  const go = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMobileOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setSent(true);
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(30_15%_97%)]">
+    <div className="min-h-screen" style={{ background: "hsl(40 20% 97%)", color: DARK }}>
 
-      {/* ═══ HEADER ═══ */}
-      <header className="sticky top-0 z-50 bg-[hsl(210_20%_14%)] shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button onClick={() => scrollTo("hero")} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[hsl(28_85%_48%)] flex items-center justify-center text-white font-mont font-black text-sm">74</div>
-            <div>
-              <div className="text-white font-mont font-bold text-base leading-none">СтройПесок</div>
-              <div className="text-[hsl(43_90%_56%)] text-xs font-mont font-semibold">Челябинск</div>
+      {/* ══════ HEADER ══════ */}
+      <header className="sticky top-0 z-50 shadow-md" style={{ background: "hsl(220 28% 13%)" }}>
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <button onClick={() => go("hero")} className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center font-mont font-black text-sm text-white"
+              style={{ background: BLUE }}>
+              74
+            </div>
+            <div className="leading-none">
+              <div className="font-mont font-extrabold text-white text-[15px]">УралПесок</div>
+              <div className="text-[11px] font-mont font-semibold" style={{ color: AMBER }}>Челябинск · Область</div>
             </div>
           </button>
 
-          <nav className="hidden lg:flex items-center gap-7">
-            {NAV_LINKS.map(l => (
-              <button
-                key={l.href}
-                onClick={() => scrollTo(l.href)}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors font-mont"
-              >
-                {l.label}
+          {/* Desktop nav */}
+          <nav className="hidden xl:flex items-center gap-6">
+            {NAV.map(n => (
+              <button key={n.id} onClick={() => go(n.id)}
+                className="text-[13px] font-mont font-medium text-white/65 hover:text-white transition-colors whitespace-nowrap">
+                {n.label}
               </button>
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-3">
-            <a href="tel:+73512000000" className="flex items-center gap-2 text-white font-mont font-semibold text-sm">
-              <Icon name="Phone" size={15} className="text-[hsl(43_90%_56%)]" />
+          {/* Phone + CTA */}
+          <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+            <a href="tel:+73512000000"
+              className="flex items-center gap-1.5 text-sm font-mont font-bold text-white/90 hover:text-white transition-colors">
+              <Icon name="Phone" size={14} style={{ color: AMBER }} />
               +7 (351) 200-00-00
             </a>
-            <button className="btn-primary px-5 py-2 rounded-lg text-sm" onClick={() => scrollTo("contacts")}>
+            <button onClick={() => go("contacts")}
+              className="px-5 py-2 rounded-lg text-sm font-mont font-bold text-white transition-all hover:opacity-90 active:scale-95"
+              style={{ background: BLUE }}>
               Заказать
             </button>
           </div>
 
-          <button className="lg:hidden text-white p-1" onClick={() => setMenuOpen(!menuOpen)}>
-            <Icon name={menuOpen ? "X" : "Menu"} size={24} />
+          {/* Burger */}
+          <button className="xl:hidden text-white p-1" onClick={() => setMobileOpen(v => !v)}>
+            <Icon name={mobileOpen ? "X" : "Menu"} size={24} />
           </button>
         </div>
 
-        {menuOpen && (
-          <div className="lg:hidden bg-[hsl(210_20%_10%)] px-4 py-4 flex flex-col gap-3">
-            {NAV_LINKS.map(l => (
-              <button key={l.href} onClick={() => scrollTo(l.href)} className="text-left text-white/80 font-mont text-sm py-1.5">
-                {l.label}
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="xl:hidden px-4 pb-4 pt-2 flex flex-col gap-1" style={{ background: "hsl(220 28% 10%)" }}>
+            {NAV.map(n => (
+              <button key={n.id} onClick={() => go(n.id)}
+                className="text-left py-2 text-sm text-white/75 font-mont hover:text-white transition-colors">
+                {n.label}
               </button>
             ))}
-            <a href="tel:+73512000000" className="text-[hsl(43_90%_56%)] font-mont font-bold text-base pt-1">
+            <a href="tel:+73512000000"
+              className="mt-2 flex items-center gap-2 font-mont font-bold text-base" style={{ color: AMBER }}>
+              <Icon name="Phone" size={16} />
               +7 (351) 200-00-00
             </a>
           </div>
         )}
       </header>
 
-      {/* ═══ HERO ═══ */}
-      <section id="hero" className="relative overflow-hidden bg-[hsl(210_20%_14%)] min-h-[92vh] flex items-center">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url(${IMG_SAND})`,
-            opacity: 0.18,
-          }}
-        />
-        {/* Diagonal stripe overlay */}
+      {/* ══════ HERO ══════ */}
+      <section id="hero" className="relative overflow-hidden min-h-[88vh] flex items-center"
+        style={{ background: "hsl(220 28% 13%)" }}>
+        {/* BG image */}
+        <div className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${IMG_SAND})`, opacity: 0.15 }} />
         <div className="absolute inset-0"
-          style={{
-            background: "repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 80px)"
-          }}
-        />
+          style={{ background: "linear-gradient(135deg, hsl(220 28% 10% / 0.9) 40%, hsl(210 80% 38% / 0.15))" }} />
 
         <div className="relative max-w-7xl mx-auto px-4 py-20 w-full">
-          <div className="max-w-3xl anim-up">
-            <div className="inline-flex items-center gap-2 bg-[hsl(28_85%_48%)]/20 border border-[hsl(28_85%_48%)]/40 rounded-full px-4 py-1.5 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[hsl(43_90%_56%)] animate-pulse"></span>
-              <span className="text-[hsl(43_90%_56%)] text-sm font-mont font-semibold">Работаем по Челябинску и области</span>
+          <div className="max-w-2xl anim-up">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 mb-7"
+              style={{ borderColor: `${AMBER}55`, background: `${AMBER}15` }}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: AMBER }} />
+              <span className="text-xs font-mont font-bold uppercase tracking-widest" style={{ color: AMBER }}>
+                Челябинск и Челябинская область
+              </span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] text-white mb-6 font-mont">
-              Белый песок.<br />
-              <span className="text-[hsl(43_90%_56%)]">Доставка.</span><br />
-              Деревянные<br />
-              <span style={{ color: "hsl(28 85% 60%)" }}>изделия.</span>
+            <h1 className="font-mont font-black text-white leading-[1.06] mb-6"
+              style={{ fontSize: "clamp(2.4rem, 5.5vw, 4.2rem)" }}>
+              Белый песок<br />
+              <span style={{ color: AMBER }}>для детских садов</span><br />
+              и сыпучие грузы<br />
+              <span style={{ color: "hsl(210 80% 72%)" }}>с доставкой</span>
             </h1>
 
-            <p className="text-white/60 text-lg mb-8 max-w-xl leading-relaxed">
-              Мешки 50 кг и навал — щебень, песок, чернозём. Детские песочницы, домики, веранды из сосны. Спил аварийных деревьев.
+            <p className="text-white/55 text-lg leading-relaxed mb-8 max-w-xl">
+              Мешки 50 кг и навал: песок, щебень, чернозём. Деревянные песочницы, домики и веранды. Спил и вывоз аварийных деревьев.
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <button className="btn-primary px-8 py-4 rounded-xl text-base" onClick={() => scrollTo("contacts")}>
+              <button onClick={() => go("contacts")}
+                className="px-8 py-4 rounded-xl text-base font-mont font-bold text-white transition-all hover:opacity-90 active:scale-95"
+                style={{ background: BLUE }}>
                 Оставить заявку
               </button>
-              <button className="btn-outline-white px-8 py-4 rounded-xl text-base" onClick={() => scrollTo("calc")}>
-                Рассчитать стоимость
+              <button onClick={() => go("services")}
+                className="px-8 py-4 rounded-xl text-base font-mont font-semibold border transition-all hover:bg-white/10"
+                style={{ borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.85)" }}>
+                Все услуги
               </button>
             </div>
           </div>
 
-          {/* Stats strip */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 anim-up delay-3">
+          {/* Stats */}
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 anim-up delay-3">
             {[
               ["8 лет", "на рынке"],
-              ["2 000+", "довольных клиентов"],
-              ["В тот же день", "доставка"],
-              ["Собственный", "автопарк"],
-            ].map(([n, l]) => (
-              <div key={n} className="bg-white/5 border border-white/10 rounded-xl px-4 py-4">
-                <div className="text-[hsl(43_90%_56%)] font-mont font-black text-xl">{n}</div>
-                <div className="text-white/50 text-sm mt-0.5">{l}</div>
+              ["2 500+", "клиентов"],
+              ["Доставка", "в тот же день"],
+              ["10+", "единиц техники"],
+            ].map(([v, l]) => (
+              <div key={v} className="rounded-xl border px-4 py-4"
+                style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.08)" }}>
+                <div className="font-mont font-black text-xl" style={{ color: AMBER }}>{v}</div>
+                <div className="text-xs text-white/45 mt-0.5">{l}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ SERVICES ═══ */}
+      {/* ══════ SERVICES GRID ══════ */}
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-12">
-            <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Что мы делаем</p>
-            <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont">Наши услуги</h2>
+            <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: BLUE }}>Что мы делаем</p>
+            <h2 className="text-4xl font-mont font-black" style={{ color: DARK }}>Наши услуги</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {SERVICES.map((s, i) => (
-              <div
-                key={s.title}
-                className="bg-[hsl(30_15%_97%)] rounded-2xl p-6 card-lift cursor-pointer anim-up border border-[hsl(30_15%_90%)]"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: s.color + "22" }}
-                >
-                  <Icon name={s.icon} size={22} style={{ color: s.color }} />
+              <button key={s.id} onClick={() => go(s.id)}
+                className="text-left rounded-2xl p-6 border card-hover anim-up"
+                style={{ background: s.bg, borderColor: s.color + "30", animationDelay: `${i * 0.08}s` }}>
+                <div className="text-4xl mb-4">{s.emoji}</div>
+                <div className="text-xs font-mont font-bold uppercase tracking-wide mb-1" style={{ color: s.color }}>{s.sub}</div>
+                <h3 className="font-mont font-bold text-base leading-snug mb-2" style={{ color: DARK }}>{s.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "hsl(220 10% 45%)" }}>{s.desc}</p>
+                <div className="mt-4 flex items-center gap-1 text-xs font-mont font-semibold" style={{ color: s.color }}>
+                  Подробнее <Icon name="ChevronRight" size={14} />
                 </div>
-                <h3 className="font-mont font-bold text-base text-[hsl(210_20%_14%)] mb-2 leading-snug">{s.title}</h3>
-                <p className="text-sm text-[hsl(25_10%_45%)] leading-relaxed">{s.desc}</p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ CATALOG ═══ */}
-      <section id="catalog" className="py-20 bg-[hsl(30_15%_97%)]">
+      {/* ══════ SAND SECTION ══════ */}
+      <section id="sand" className="py-20" style={{ background: "hsl(40 20% 97%)" }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-12">
-            <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Цены и наличие</p>
-            <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont">Прайс-лист</h2>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {PRODUCTS.map((p, i) => (
-              <div
-                key={p.name}
-                className="bg-white rounded-2xl p-5 card-lift border border-[hsl(30_15%_90%)] anim-up"
-                style={{ animationDelay: `${i * 0.06}s` }}
-              >
-                <div className="text-4xl mb-3">{p.emoji}</div>
-                {p.tag && (
-                  <span className="inline-block text-xs font-bold font-mont px-2.5 py-0.5 rounded-full bg-[hsl(28_85%_48%)] text-white mb-2">
-                    {p.tag}
-                  </span>
-                )}
-                <h4 className="font-mont font-bold text-[hsl(210_20%_14%)] text-sm leading-snug mb-1">{p.name}</h4>
-                <p className="text-xs text-[hsl(25_10%_50%)] mb-3">{p.unit}</p>
-                <p className="font-mont font-black text-lg text-[hsl(28_85%_48%)]">{p.price}</p>
-                <button
-                  className="mt-3 w-full py-2 rounded-lg text-xs font-mont font-bold transition-colors"
-                  style={{ backgroundColor: "hsl(30 15% 93%)", color: "hsl(210 20% 20%)" }}
-                  onClick={() => scrollTo("contacts")}
-                >
-                  Заказать
-                </button>
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            {/* Text */}
+            <div className="anim-up">
+              <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: BLUE }}>Главный продукт</p>
+              <h2 className="text-4xl font-mont font-black leading-snug mb-4" style={{ color: DARK }}>
+                Белый речной песок<br />
+                <span style={{ color: BLUE }}>для детских учреждений</span>
+              </h2>
+              <p className="text-base leading-relaxed mb-5" style={{ color: "hsl(220 10% 42%)" }}>
+                Поставляем чистый белый речной песок специально для детских песочниц: в детских садах, школах, на детских площадках и в частных дворах. Песок промытый, без примесей и крупных включений.
+              </p>
+              <div className="space-y-2.5 mb-8">
+                {[
+                  "Мешок 50 кг — удобно для переноски и хранения",
+                  "Промытый речной песок — безопасен для детей",
+                  "Соответствует санитарным нормам",
+                  "Оптовые поставки для детских садов и школ",
+                  "Доставка по Челябинску — бесплатно от 20 мешков",
+                ].map(t => (
+                  <div key={t} className="flex items-start gap-2.5">
+                    <Icon name="CheckCircle" size={17} className="flex-shrink-0 mt-0.5" style={{ color: BLUE }} />
+                    <span className="text-sm" style={{ color: "hsl(220 10% 35%)" }}>{t}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+              <button onClick={() => go("contacts")}
+                className="px-8 py-3.5 rounded-xl font-mont font-bold text-white text-base transition-all hover:opacity-90"
+                style={{ background: BLUE }}>
+                Заказать песок
+              </button>
+            </div>
+
+            {/* Price table + img */}
+            <div className="space-y-4 anim-up delay-2">
+              <img src={IMG_SAND} alt="Белый песок в мешках"
+                className="w-full h-52 object-cover rounded-2xl mb-4" />
+              {SAND_PRODUCTS.map((p, i) => (
+                <div key={i} className="bg-white rounded-xl p-4 flex items-center justify-between border card-hover"
+                  style={{ borderColor: "hsl(40 15% 87%)" }}>
+                  <div>
+                    <div className="font-mont font-bold text-sm" style={{ color: DARK }}>{p.qty}</div>
+                    <div className="text-xs mt-0.5" style={{ color: "hsl(220 10% 55%)" }}>{p.note}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mont font-black text-lg" style={{ color: BLUE }}>{p.price}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ CALCULATOR ═══ */}
-      <section id="calc" className="py-20 bg-[hsl(210_20%_14%)]">
+      {/* ══════ BULK SECTION ══════ */}
+      <section id="bulk" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            {/* img side */}
+            <div className="order-last lg:order-first anim-up">
+              <img src={IMG_TRUCK} alt="Доставка сыпучих грузов"
+                className="w-full h-72 object-cover rounded-2xl mb-6" />
+              {/* mini features */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { ico: "Truck", t: "Самосвалы 5–20 т" },
+                  { ico: "Clock", t: "Доставка в день заказа" },
+                  { ico: "MapPin", t: "Вся Челябинская область" },
+                  { ico: "Shield", t: "Замер по факту" },
+                ].map(({ ico, t }) => (
+                  <div key={t} className="rounded-xl p-3.5 flex items-center gap-2.5 border"
+                    style={{ background: "hsl(38 85% 52% / 0.07)", borderColor: "hsl(38 85% 52% / 0.2)" }}>
+                    <Icon name={ico as never} size={16} style={{ color: AMBER }} />
+                    <span className="text-xs font-mont font-semibold" style={{ color: DARK }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* text + table */}
+            <div className="anim-up delay-1">
+              <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: AMBER }}>Навалом по всей области</p>
+              <h2 className="text-4xl font-mont font-black leading-snug mb-4" style={{ color: DARK }}>
+                Сыпучие материалы<br />
+                <span style={{ color: AMBER }}>с доставкой</span>
+              </h2>
+              <p className="text-base leading-relaxed mb-6" style={{ color: "hsl(220 10% 42%)" }}>
+                Доставляем песок, щебень, гравий, ПГС и чернозём самосвалами по Челябинску и Челябинской области. Работаем с частными и юридическими лицами.
+              </p>
+              <div className="space-y-2 mb-8">
+                {BULK_PRODUCTS.map(p => (
+                  <div key={p.name} className="rounded-xl p-3.5 flex items-center justify-between border card-hover"
+                    style={{ borderColor: "hsl(40 15% 87%)", background: "hsl(40 20% 97%)" }}>
+                    <div>
+                      <div className="font-mont font-semibold text-sm" style={{ color: DARK }}>{p.name}</div>
+                      <div className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>за {p.unit}</div>
+                    </div>
+                    <div className="font-mont font-black text-base" style={{ color: AMBER }}>{p.price}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => go("contacts")}
+                className="px-8 py-3.5 rounded-xl font-mont font-bold text-sm transition-all hover:opacity-90"
+                style={{ background: AMBER, color: DARK }}>
+                Рассчитать доставку
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════ CALCULATOR ══════ */}
+      <section id="calc" className="py-20" style={{ background: "hsl(220 28% 13%)" }}>
         <div className="max-w-4xl mx-auto px-4">
-          <div className="mb-10 text-center">
-            <p className="text-[hsl(43_90%_56%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Быстро и удобно</p>
-            <h2 className="text-4xl font-black text-white font-mont">Калькулятор стоимости</h2>
+          <div className="text-center mb-12">
+            <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: AMBER }}>Быстрый расчёт</p>
+            <h2 className="text-4xl font-mont font-black text-white">Калькулятор стоимости</h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Bags calc */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <h3 className="font-mont font-bold text-white text-lg mb-1">🪣 Песок в мешках</h3>
-              <p className="text-white/40 text-sm mb-6">Мешок 50 кг — {SAND_PRICE} ₽</p>
+            {/* Bags */}
+            <div className="rounded-2xl p-6 border"
+              style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)" }}>
+              <div className="text-2xl mb-2">🪣</div>
+              <h3 className="font-mont font-bold text-white text-lg mb-1">Песок в мешках</h3>
+              <p className="text-xs text-white/40 mb-5">{SAND_PRICE} ₽ / мешок 50 кг</p>
 
-              <label className="text-white/60 text-sm font-mont font-semibold block mb-2">Количество мешков: <span className="text-[hsl(43_90%_56%)]">{bags} шт.</span></label>
-              <input
-                type="range"
-                min={1} max={500} value={bags}
-                onChange={e => setBags(Number(e.target.value))}
-                className="w-full mb-6 accent-[hsl(28_85%_48%)]"
-              />
+              <label className="block text-sm font-mont font-semibold text-white/60 mb-2">
+                Количество: <span style={{ color: AMBER }}>{bags} мешков</span>
+              </label>
+              <input type="range" min={1} max={200} value={bags}
+                onChange={e => setBags(+e.target.value)}
+                className="w-full mb-6 accent-blue-500" />
 
-              <div className="bg-white/5 rounded-xl p-4 flex justify-between items-center">
+              <div className="rounded-xl p-4 flex justify-between"
+                style={{ background: "rgba(255,255,255,0.05)" }}>
                 <div>
-                  <div className="text-white/50 text-sm">Итого:</div>
-                  <div className="text-white font-mont font-black text-2xl">{(bags * SAND_PRICE).toLocaleString("ru")} ₽</div>
+                  <div className="text-xs text-white/40 mb-0.5">Итого</div>
+                  <div className="font-mont font-black text-2xl text-white">{(bags * SAND_PRICE).toLocaleString("ru")} ₽</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white/50 text-sm">Вес:</div>
-                  <div className="text-[hsl(43_90%_56%)] font-mont font-bold text-lg">{(bags * 50).toLocaleString("ru")} кг</div>
+                  <div className="text-xs text-white/40 mb-0.5">Вес</div>
+                  <div className="font-mont font-bold text-lg" style={{ color: AMBER }}>{bags * 50} кг</div>
                 </div>
               </div>
             </div>
 
-            {/* Bulk calc */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-              <h3 className="font-mont font-bold text-white text-lg mb-1">🚛 Навалом</h3>
-              <p className="text-white/40 text-sm mb-6">Тонна — от {BULK_PRICE} ₽</p>
+            {/* Bulk */}
+            <div className="rounded-2xl p-6 border"
+              style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)" }}>
+              <div className="text-2xl mb-2">🚛</div>
+              <h3 className="font-mont font-bold text-white text-lg mb-1">Сыпучие навалом</h3>
+              <p className="text-xs text-white/40 mb-5">от {BULK_PRICE} ₽ / тонна</p>
 
-              <label className="text-white/60 text-sm font-mont font-semibold block mb-2">Объём: <span className="text-[hsl(43_90%_56%)]">{bulk} тонн</span></label>
-              <input
-                type="range"
-                min={1} max={50} value={bulk}
-                onChange={e => setBulk(Number(e.target.value))}
-                className="w-full mb-6 accent-[hsl(28_85%_48%)]"
-              />
+              <label className="block text-sm font-mont font-semibold text-white/60 mb-2">
+                Объём: <span style={{ color: AMBER }}>{tons} тонн</span>
+              </label>
+              <input type="range" min={1} max={100} value={tons}
+                onChange={e => setTons(+e.target.value)}
+                className="w-full mb-6 accent-yellow-400" />
 
-              <div className="bg-white/5 rounded-xl p-4 flex justify-between items-center">
+              <div className="rounded-xl p-4 flex justify-between"
+                style={{ background: "rgba(255,255,255,0.05)" }}>
                 <div>
-                  <div className="text-white/50 text-sm">Итого:</div>
-                  <div className="text-white font-mont font-black text-2xl">{(bulk * BULK_PRICE).toLocaleString("ru")} ₽</div>
+                  <div className="text-xs text-white/40 mb-0.5">Ориентировочно</div>
+                  <div className="font-mont font-black text-2xl text-white">{(tons * BULK_PRICE).toLocaleString("ru")} ₽</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-white/50 text-sm">Объём:</div>
-                  <div className="text-[hsl(43_90%_56%)] font-mont font-bold text-lg">{bulk} т</div>
+                  <div className="text-xs text-white/40 mb-0.5">Объём</div>
+                  <div className="font-mont font-bold text-lg" style={{ color: AMBER }}>{tons} т</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <p className="text-center text-white/30 text-sm mt-6">* Точная стоимость с учётом доставки рассчитывается индивидуально</p>
-
+          <p className="text-center text-white/25 text-xs mt-5">
+            * Цены ориентировочные. Точная стоимость с учётом доставки — по запросу.
+          </p>
           <div className="text-center mt-6">
-            <button className="btn-primary px-10 py-4 rounded-xl text-base" onClick={() => scrollTo("contacts")}>
+            <button onClick={() => go("contacts")}
+              className="px-10 py-4 rounded-xl font-mont font-bold text-white text-base transition-all hover:opacity-90"
+              style={{ background: BLUE }}>
               Получить точный расчёт
             </button>
           </div>
         </div>
       </section>
 
-      {/* ═══ GALLERY ═══ */}
-      <section className="py-20 bg-white">
+      {/* ══════ WOOD SECTION ══════ */}
+      <section id="wood" className="py-20" style={{ background: "hsl(40 20% 97%)" }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-12">
-            <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Наши работы</p>
-            <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont">Фотогалерея</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { img: IMG_SAND, label: "Песок и сыпучие грузы" },
-              { img: IMG_WOOD, label: "Деревянные изделия" },
-              { img: IMG_TREE, label: "Спил деревьев" },
-            ].map(item => (
-              <div key={item.label} className="relative rounded-2xl overflow-hidden group card-lift">
-                <img src={item.img} alt={item.label} className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <span className="text-white font-mont font-bold text-base">{item.label}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ ABOUT ═══ */}
-      <section id="about" className="py-20 bg-[hsl(30_15%_97%)]">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-14 items-center">
-            <div>
-              <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">О нас</p>
-              <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont mb-5 leading-snug">
-                Надёжный поставщик<br />для Урала
+          <div className="grid lg:grid-cols-2 gap-14 items-start">
+            <div className="anim-up">
+              <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: "hsl(25 55% 38%)" }}>Производство в Челябинске</p>
+              <h2 className="text-4xl font-mont font-black leading-snug mb-4" style={{ color: DARK }}>
+                Деревянные изделия<br />
+                <span style={{ color: "hsl(25 55% 38%)" }}>из натуральной сосны</span>
               </h2>
-              <p className="text-[hsl(25_10%_40%)] leading-relaxed mb-4">
-                С 2016 года мы поставляем сыпучие материалы и производим деревянные изделия для жителей Челябинска и всей Челябинской области. Собственный автопарк позволяет обеспечивать быструю доставку.
+              <p className="text-base leading-relaxed mb-5" style={{ color: "hsl(220 10% 42%)" }}>
+                Изготавливаем детские песочницы, домики и веранды под заказ. Используем только сухую строганую сосну, обработанную безопасными красками. Доставка и монтаж по Челябинску.
               </p>
-              <p className="text-[hsl(25_10%_40%)] leading-relaxed mb-8">
-                Работаем с частными заказчиками, строительными компаниями, детскими садами и школами. Все материалы сертифицированы и соответствуют ГОСТу.
-              </p>
-
-              <div className="space-y-3">
+              <div className="space-y-2 mb-6">
                 {[
-                  "Сертифицированный белый речной песок",
-                  "Собственные самосвалы — без посредников",
-                  "Производство деревянных изделий в Челябинске",
-                  "Спил деревьев с вывозом и уборкой",
-                  "Работаем с юр. лицами и физ. лицами",
-                ].map(item => (
-                  <div key={item} className="flex items-center gap-3">
-                    <Icon name="CheckCircle" size={18} className="text-[hsl(28_85%_48%)] flex-shrink-0" />
-                    <span className="text-sm text-[hsl(25_10%_35%)]">{item}</span>
+                  "Натуральная сосна без сучков",
+                  "Обработка безопасными красками и пропитками",
+                  "Изготовление от 7 дней",
+                  "Доставка и сборка на месте",
+                  "Гарантия 2 года",
+                ].map(t => (
+                  <div key={t} className="flex items-center gap-2.5">
+                    <Icon name="CheckCircle" size={16} style={{ color: "hsl(25 55% 38%)" }} />
+                    <span className="text-sm" style={{ color: "hsl(220 10% 38%)" }}>{t}</span>
                   </div>
                 ))}
               </div>
+              <img src={IMG_WOOD} alt="Деревянные изделия"
+                className="w-full h-56 object-cover rounded-2xl" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { n: "8+", l: "лет опыта" },
-                { n: "2 000+", l: "выполненных заказов" },
-                { n: "15", l: "единиц техники" },
-                { n: "24/7", l: "приём заявок" },
-              ].map(({ n, l }) => (
-                <div key={n} className="bg-white rounded-2xl p-6 text-center border border-[hsl(30_15%_90%)] card-lift">
-                  <div className="text-3xl font-mont font-black text-[hsl(28_85%_48%)] mb-1">{n}</div>
-                  <div className="text-sm text-[hsl(25_10%_50%)]">{l}</div>
+            <div className="space-y-3 anim-up delay-2">
+              <h3 className="font-mont font-bold text-lg mb-4" style={{ color: DARK }}>Прайс-лист</h3>
+              {WOOD_PRODUCTS.map((p, i) => (
+                <div key={i} className="bg-white rounded-xl p-4 flex items-center justify-between border card-hover"
+                  style={{ borderColor: "hsl(40 15% 87%)" }}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{p.emoji}</span>
+                    <div>
+                      <div className="font-mont font-bold text-sm" style={{ color: DARK }}>{p.name}</div>
+                      <div className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>{p.size}</div>
+                    </div>
+                  </div>
+                  <div className="font-mont font-black text-base" style={{ color: "hsl(25 55% 38%)" }}>{p.price}</div>
                 </div>
               ))}
+              <button onClick={() => go("contacts")}
+                className="mt-2 w-full py-3.5 rounded-xl font-mont font-bold text-white text-sm transition-all hover:opacity-90"
+                style={{ background: "hsl(25 55% 38%)" }}>
+                Заказать изделие
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ REVIEWS ═══ */}
-      <section id="reviews" className="py-20 bg-white">
+      {/* ══════ TREES SECTION ══════ */}
+      <section id="trees" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
+            {/* Info */}
+            <div className="anim-up">
+              <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: "hsl(140 45% 33%)" }}>Безопасно и оперативно</p>
+              <h2 className="text-4xl font-mont font-black leading-snug mb-4" style={{ color: DARK }}>
+                Спил аварийных<br />
+                <span style={{ color: "hsl(140 45% 33%)" }}>деревьев с вывозом</span>
+              </h2>
+              <p className="text-base leading-relaxed mb-6" style={{ color: "hsl(220 10% 42%)" }}>
+                Профессионально спиливаем аварийные, сухостойные и опасные деревья на частных участках, во дворах и на предприятиях Челябинска. Полный цикл: спил → вывоз → уборка.
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                {[
+                  { ico: "TreePine", t: "Любой диаметр ствола" },
+                  { ico: "Truck", t: "Вывоз и утилизация" },
+                  { ico: "Shield", t: "Страховка ответственности" },
+                  { ico: "Clock", t: "Срочный выезд за 2 часа" },
+                ].map(({ ico, t }) => (
+                  <div key={t} className="rounded-xl p-3.5 flex items-center gap-2.5 border"
+                    style={{ background: "hsl(140 45% 33% / 0.06)", borderColor: "hsl(140 45% 33% / 0.2)" }}>
+                    <Icon name={ico as never} size={16} style={{ color: "hsl(140 45% 33%)" }} />
+                    <span className="text-xs font-mont font-semibold" style={{ color: DARK }}>{t}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-2xl p-5 mb-6 border"
+                style={{ background: "hsl(140 45% 33% / 0.06)", borderColor: "hsl(140 45% 33% / 0.2)" }}>
+                <div className="font-mont font-bold text-base mb-1" style={{ color: DARK }}>Стоимость спила</div>
+                <div className="text-sm" style={{ color: "hsl(220 10% 42%)" }}>
+                  Зависит от высоты, диаметра ствола и сложности доступа. Выезд мастера для оценки — бесплатно.
+                </div>
+                <div className="mt-3 font-mont font-black text-xl" style={{ color: "hsl(140 45% 33%)" }}>от 1 500 ₽</div>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => go("contacts")}
+                  className="flex-1 py-3.5 rounded-xl font-mont font-bold text-white text-sm transition-all hover:opacity-90"
+                  style={{ background: "hsl(140 45% 33%)" }}>
+                  Вызвать мастера
+                </button>
+                <a href="tel:+73512000000"
+                  className="flex items-center gap-2 px-5 py-3.5 rounded-xl border font-mont font-semibold text-sm transition-all hover:bg-gray-50"
+                  style={{ borderColor: "hsl(40 15% 82%)", color: DARK }}>
+                  <Icon name="Phone" size={15} />
+                  Позвонить
+                </a>
+              </div>
+            </div>
+
+            {/* Visual right */}
+            <div className="rounded-2xl overflow-hidden anim-up delay-2"
+              style={{ background: "hsl(220 28% 13%)", minHeight: "420px", position: "relative" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                <div className="text-7xl mb-5">🌳</div>
+                <h4 className="font-mont font-black text-white text-2xl mb-3">Срочный вызов</h4>
+                <p className="text-white/50 text-sm leading-relaxed mb-6">
+                  Дерево упало или угрожает постройкам? Выезжаем экстренно в любой день — включая выходные и праздники.
+                </p>
+                <a href="tel:+73512000000"
+                  className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-mont font-bold text-sm text-white transition-all hover:opacity-90"
+                  style={{ background: "hsl(140 45% 33%)" }}>
+                  <Icon name="Phone" size={16} />
+                  +7 (351) 200-00-00
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════ REVIEWS ══════ */}
+      <section className="py-20" style={{ background: "hsl(40 20% 97%)" }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-12">
-            <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Отзывы</p>
-            <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont">Нам доверяют</h2>
+            <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: BLUE }}>Отзывы клиентов</p>
+            <h2 className="text-4xl font-mont font-black" style={{ color: DARK }}>Нам доверяют</h2>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {REVIEWS.map((r, i) => (
-              <div key={i} className="bg-[hsl(30_15%_97%)] rounded-2xl p-5 border border-[hsl(30_15%_90%)] card-lift anim-up" style={{ animationDelay: `${i * 0.08}s` }}>
+              <div key={i} className="bg-white rounded-2xl p-5 border card-hover anim-up"
+                style={{ borderColor: "hsl(40 15% 87%)", animationDelay: `${i * 0.08}s` }}>
                 <div className="flex gap-0.5 mb-3">
                   {Array.from({ length: r.stars }).map((_, j) => (
-                    <span key={j} className="text-[hsl(43_90%_56%)] text-sm">★</span>
+                    <span key={j} className="text-sm" style={{ color: AMBER }}>★</span>
                   ))}
                 </div>
-                <p className="text-sm text-[hsl(25_10%_35%)] leading-relaxed mb-4">«{r.text}»</p>
-                <p className="font-mont font-bold text-sm text-[hsl(210_20%_20%)]">{r.name}</p>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(220 10% 38%)" }}>«{r.text}»</p>
+                <div>
+                  <div className="font-mont font-bold text-sm" style={{ color: DARK }}>{r.name}</div>
+                  <div className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>{r.role}</div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ CONTACTS ═══ */}
-      <section id="contacts" className="py-20 bg-[hsl(30_15%_97%)]">
+      {/* ══════ CONTACTS ══════ */}
+      <section id="contacts" className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="mb-12 text-center">
-            <p className="text-[hsl(28_85%_48%)] font-mont font-bold text-sm uppercase tracking-widest mb-2">Связаться</p>
-            <h2 className="text-4xl font-black text-[hsl(210_20%_14%)] font-mont">Оставьте заявку</h2>
-            <p className="text-[hsl(25_10%_45%)] mt-3">Перезвоним в течение 15 минут и рассчитаем стоимость</p>
+          <div className="text-center mb-12">
+            <p className="text-xs font-mont font-bold uppercase tracking-widest mb-2" style={{ color: BLUE }}>Связаться с нами</p>
+            <h2 className="text-4xl font-mont font-black mb-3" style={{ color: DARK }}>Оставьте заявку</h2>
+            <p style={{ color: "hsl(220 10% 50%)" }}>Перезвоним в течение 15 минут и рассчитаем стоимость</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-10">
-            {/* Contacts info */}
-            <div className="space-y-5">
+            {/* Info */}
+            <div className="space-y-4">
               {[
-                { icon: "Phone" as IconName, label: "Телефон", value: "+7 (351) 200-00-00", sub: "Пн–Вс 8:00–20:00" },
-                { icon: "Mail" as IconName, label: "Email", value: "info@stroypesok74.ru", sub: "Ответим быстро" },
-                { icon: "MapPin" as IconName, label: "Адрес", value: "г. Челябинск", sub: "Работаем по всей области" },
+                { ico: "Phone", label: "Телефон", val: "+7 (351) 200-00-00", sub: "Пн–Вс 8:00–20:00" },
+                { ico: "Mail", label: "E-mail", val: "info@uralpesok.ru", sub: "Ответим в тот же день" },
+                { ico: "MapPin", label: "Зона работы", val: "Челябинск и область", sub: "Выезд по всей Челябинской области" },
               ].map(item => (
-                <div key={item.label} className="flex items-center gap-4 bg-white rounded-2xl p-4 border border-[hsl(30_15%_90%)]">
-                  <div className="w-11 h-11 rounded-xl bg-[hsl(28_85%_48%)] flex items-center justify-center flex-shrink-0">
-                    <Icon name={item.icon} size={18} className="text-white" />
+                <div key={item.label} className="flex items-center gap-4 rounded-2xl p-4 border"
+                  style={{ borderColor: "hsl(40 15% 87%)", background: "hsl(40 20% 97%)" }}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+                    style={{ background: BLUE }}>
+                    <Icon name={item.ico as never} size={17} />
                   </div>
                   <div>
-                    <div className="text-xs text-[hsl(25_10%_50%)] font-mont font-semibold uppercase tracking-wide">{item.label}</div>
-                    <div className="font-mont font-bold text-[hsl(210_20%_14%)] text-sm">{item.value}</div>
-                    <div className="text-xs text-[hsl(25_10%_55%)]">{item.sub}</div>
+                    <div className="text-xs font-mont font-bold uppercase tracking-wide" style={{ color: "hsl(220 10% 55%)" }}>{item.label}</div>
+                    <div className="font-mont font-bold text-sm" style={{ color: DARK }}>{item.val}</div>
+                    <div className="text-xs" style={{ color: "hsl(220 10% 55%)" }}>{item.sub}</div>
                   </div>
                 </div>
               ))}
 
-              <div className="bg-[hsl(28_85%_48%)] rounded-2xl p-5 text-white">
-                <div className="font-mont font-black text-lg mb-1">Срочный вызов</div>
-                <p className="text-white/70 text-sm mb-3">Спил аварийных деревьев, экстренная доставка — работаем в выходные</p>
-                <a href="tel:+73512000000" className="inline-flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2.5 font-mont font-bold text-sm hover:bg-white/25 transition-colors">
+              {/* CTA block */}
+              <div className="rounded-2xl p-5 text-white"
+                style={{ background: `linear-gradient(135deg, ${BLUE}, hsl(210 80% 28%))` }}>
+                <div className="font-mont font-black text-lg mb-1">Срочный заказ?</div>
+                <p className="text-white/65 text-sm mb-4">
+                  Позвоните — обсудим детали и организуем доставку в удобное время.
+                </p>
+                <a href="tel:+73512000000"
+                  className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-mont font-bold text-sm transition-all hover:bg-white/20"
+                  style={{ background: "rgba(255,255,255,0.14)", color: "white" }}>
                   <Icon name="Phone" size={15} />
                   Позвонить сейчас
                 </a>
@@ -475,69 +670,67 @@ export default function Index() {
             </div>
 
             {/* Form */}
-            <div className="bg-white rounded-2xl p-6 border border-[hsl(30_15%_90%)] shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border shadow-sm"
+              style={{ borderColor: "hsl(40 15% 87%)" }}>
               {sent ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-8">
-                  <div className="w-16 h-16 rounded-full bg-[hsl(28_85%_48%)] flex items-center justify-center mb-4">
-                    <Icon name="CheckCircle" size={30} className="text-white" />
+                <div className="h-full flex flex-col items-center justify-center text-center py-10">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 text-white"
+                    style={{ background: BLUE }}>
+                    <Icon name="CheckCircle" size={28} />
                   </div>
-                  <h3 className="font-mont font-black text-xl text-[hsl(210_20%_14%)] mb-2">Заявка отправлена!</h3>
-                  <p className="text-[hsl(25_10%_45%)] text-sm">Перезвоним вам в течение 15 минут</p>
+                  <h3 className="font-mont font-black text-xl mb-2" style={{ color: DARK }}>Заявка отправлена!</h3>
+                  <p style={{ color: "hsl(220 10% 50%)" }} className="text-sm">Перезвоним вам в течение 15 минут</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <h3 className="font-mont font-bold text-[hsl(210_20%_14%)] text-lg mb-4">Оставить заявку</h3>
+                <form onSubmit={submit} className="space-y-4">
+                  <h3 className="font-mont font-bold text-lg mb-4" style={{ color: DARK }}>Форма заявки</h3>
 
                   <div>
-                    <label className="text-sm font-mont font-semibold text-[hsl(25_10%_35%)] block mb-1.5">Ваше имя *</label>
-                    <input
-                      required type="text" placeholder="Иван Петров"
+                    <label className="block text-sm font-mont font-semibold mb-1.5" style={{ color: "hsl(220 10% 38%)" }}>Ваше имя *</label>
+                    <input required type="text" placeholder="Иван Петров"
                       value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:border-[hsl(28_85%_48%)] transition-colors"
-                      style={{ borderColor: "hsl(30 15% 85%)" }}
-                    />
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-colors"
+                      style={{ borderColor: "hsl(40 15% 85%)" }} />
                   </div>
 
                   <div>
-                    <label className="text-sm font-mont font-semibold text-[hsl(25_10%_35%)] block mb-1.5">Телефон *</label>
-                    <input
-                      required type="tel" placeholder="+7 (351) ___-__-__"
+                    <label className="block text-sm font-mont font-semibold mb-1.5" style={{ color: "hsl(220 10% 38%)" }}>Телефон *</label>
+                    <input required type="tel" placeholder="+7 (351) ___-__-__"
                       value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:border-[hsl(28_85%_48%)] transition-colors"
-                      style={{ borderColor: "hsl(30 15% 85%)" }}
-                    />
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-colors"
+                      style={{ borderColor: "hsl(40 15% 85%)" }} />
                   </div>
 
                   <div>
-                    <label className="text-sm font-mont font-semibold text-[hsl(25_10%_35%)] block mb-1.5">Услуга</label>
-                    <select
-                      value={form.service} onChange={e => setForm({ ...form, service: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:border-[hsl(28_85%_48%)] transition-colors bg-white"
-                      style={{ borderColor: "hsl(30 15% 85%)", color: form.service ? "hsl(210 20% 14%)" : "hsl(25 10% 55%)" }}
-                    >
+                    <label className="block text-sm font-mont font-semibold mb-1.5" style={{ color: "hsl(220 10% 38%)" }}>Услуга</label>
+                    <select value={form.service} onChange={e => setForm({ ...form, service: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none bg-white transition-colors"
+                      style={{ borderColor: "hsl(40 15% 85%)", color: form.service ? DARK : "hsl(220 10% 60%)" }}>
                       <option value="">Выберите услугу...</option>
-                      <option>Белый песок в мешках</option>
+                      <option>Белый песок в мешках 50 кг</option>
                       <option>Сыпучие грузы навалом</option>
                       <option>Детская песочница</option>
                       <option>Деревянный домик / веранда</option>
-                      <option>Спил деревьев</option>
+                      <option>Спил и вывоз деревьев</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="text-sm font-mont font-semibold text-[hsl(25_10%_35%)] block mb-1.5">Комментарий</label>
-                    <textarea
-                      placeholder="Опишите ваш заказ: объём, адрес доставки..."
-                      rows={3} value={form.comment} onChange={e => setForm({ ...form, comment: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none focus:border-[hsl(28_85%_48%)] transition-colors resize-none"
-                      style={{ borderColor: "hsl(30 15% 85%)" }}
-                    />
+                    <label className="block text-sm font-mont font-semibold mb-1.5" style={{ color: "hsl(220 10% 38%)" }}>Комментарий</label>
+                    <textarea placeholder="Количество, адрес доставки, сроки..." rows={3}
+                      value={form.comment} onChange={e => setForm({ ...form, comment: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none resize-none transition-colors"
+                      style={{ borderColor: "hsl(40 15% 85%)" }} />
                   </div>
 
-                  <button type="submit" className="btn-primary w-full py-3.5 rounded-xl text-base">
+                  <button type="submit"
+                    className="w-full py-3.5 rounded-xl font-mont font-bold text-white text-base transition-all hover:opacity-90"
+                    style={{ background: BLUE }}>
                     Отправить заявку
                   </button>
-                  <p className="text-xs text-center text-[hsl(25_10%_55%)]">Нажимая кнопку, вы соглашаетесь с политикой обработки данных</p>
+                  <p className="text-xs text-center" style={{ color: "hsl(220 10% 60%)" }}>
+                    Нажимая кнопку, вы соглашаетесь с политикой обработки данных
+                  </p>
                 </form>
               )}
             </div>
@@ -545,25 +738,27 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══ FOOTER ═══ */}
-      <footer className="bg-[hsl(210_20%_10%)] text-white py-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[hsl(28_85%_48%)] flex items-center justify-center font-mont font-black text-sm">74</div>
-              <div>
-                <div className="font-mont font-bold">СтройПесок</div>
-                <div className="text-[hsl(43_90%_56%)] text-xs font-mont">Челябинск и область</div>
-              </div>
+      {/* ══════ FOOTER ══════ */}
+      <footer className="py-10" style={{ background: "hsl(220 28% 10%)" }}>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-mont font-black text-xs text-white"
+              style={{ background: BLUE }}>74</div>
+            <div>
+              <div className="font-mont font-bold text-white text-sm">УралПесок</div>
+              <div className="text-xs font-mont" style={{ color: AMBER }}>Челябинск и область</div>
             </div>
-            <div className="flex flex-wrap gap-5 justify-center">
-              {NAV_LINKS.map(l => (
-                <button key={l.href} onClick={() => scrollTo(l.href)} className="text-sm text-white/50 hover:text-white transition-colors font-mont">
-                  {l.label}
-                </button>
-              ))}
-            </div>
-            <div className="text-white/30 text-sm font-mont">© 2025 СтройПесок74</div>
+          </div>
+          <div className="flex flex-wrap gap-5 justify-center">
+            {NAV.map(n => (
+              <button key={n.id} onClick={() => go(n.id)}
+                className="text-xs font-mont text-white/40 hover:text-white/80 transition-colors">
+                {n.label}
+              </button>
+            ))}
+          </div>
+          <div className="text-xs font-mont" style={{ color: "rgba(255,255,255,0.25)" }}>
+            © 2025 УралПесок. Все права защищены.
           </div>
         </div>
       </footer>
