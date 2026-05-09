@@ -4,45 +4,35 @@
 
 @layer base {
   :root {
-    --background: 40 30% 98%;
-    --foreground: 25 20% 18%;
+    --background: 30 15% 97%;
+    --foreground: 25 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 25 20% 18%;
+    --card-foreground: 25 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 20% 18%;
+    --popover-foreground: 25 25% 12%;
 
-    --primary: 160 35% 52%;
+    --primary: 28 85% 48%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 60% 88%;
-    --secondary-foreground: 25 30% 25%;
+    --secondary: 210 15% 18%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 20% 94%;
+    --muted: 30 10% 93%;
     --muted-foreground: 25 10% 50%;
 
-    --accent: 270 30% 85%;
-    --accent-foreground: 270 30% 25%;
+    --accent: 43 90% 56%;
+    --accent-foreground: 25 25% 12%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 160 35% 52%;
+    --border: 30 15% 86%;
+    --input: 30 15% 86%;
+    --ring: 28 85% 48%;
 
-    --radius: 1rem;
-
-    /* Custom palette */
-    --mint: 160 35% 52%;
-    --mint-light: 160 40% 92%;
-    --peach: 25 80% 88%;
-    --peach-dark: 25 60% 72%;
-    --lavender: 270 35% 88%;
-    --lavender-dark: 270 30% 65%;
-    --cream: 40 30% 96%;
-    --sand: 35 25% 85%;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -59,91 +49,85 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-family: "Golos Text", sans-serif;
+    font-family: "IBM Plex Sans", sans-serif;
   }
-
   h1,
   h2,
-  h3 {
-    font-family: "Golos Text", sans-serif;
+  h3,
+  h4 {
+    font-family: "Montserrat", sans-serif;
     font-weight: 700;
   }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: "Cormorant", serif;
+  .font-mont {
+    font-family: "Montserrat", sans-serif;
   }
 
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease forwards;
+  .btn-primary {
+    background-color: hsl(28 85% 48%);
+    color: white;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+    transition:
+      background-color 0.2s,
+      transform 0.15s;
+  }
+  .btn-primary:hover {
+    background-color: hsl(28 85% 40%);
+    transform: translateY(-1px);
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.5s ease forwards;
+  .btn-outline-white {
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
+  }
+  .btn-outline-white:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: white;
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(32px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .delay-100 {
-    animation-delay: 0.1s;
-  }
-  .delay-200 {
-    animation-delay: 0.2s;
-  }
-  .delay-300 {
-    animation-delay: 0.3s;
-  }
-  .delay-400 {
-    animation-delay: 0.4s;
-  }
-
-  .card-hover {
+  .card-lift {
     transition:
       transform 0.25s ease,
       box-shadow 0.25s ease;
   }
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  .card-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
   }
 
-  .btn-mint {
-    background-color: hsl(var(--mint));
-    color: white;
-    transition:
-      background-color 0.2s ease,
-      transform 0.15s ease;
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  .btn-mint:hover {
-    background-color: hsl(160 35% 44%);
-    transform: translateY(-1px);
+  .anim-up {
+    animation: fadeUp 0.55s ease both;
   }
-
-  .blob {
-    border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  .delay-1 {
+    animation-delay: 0.1s;
+  }
+  .delay-2 {
+    animation-delay: 0.2s;
+  }
+  .delay-3 {
+    animation-delay: 0.3s;
+  }
+  .delay-4 {
+    animation-delay: 0.4s;
   }
 }
